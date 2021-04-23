@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: tlotr
+    environment: local
+    tier: frontend
+  name: tlotr-front-config
+  namespace: tlotr-app
+data:
+  back_connect: tlotr-back:8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: tlotr
+    environment: local
+    tier: frontend
+  name: tlotr-front
+  namespace: tlotr-app
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: tlotr
+    tier: frontend
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app: tlotr
+    environment: local
+    tier: frontend
+  name: tlotr-front-ingress
+  namespace: tlotr-app
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: tlotr-front
+            port:
+              number: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    tier: frontend
+    app: tlotr
+    environment: local
+  name: tlotr-front
+  namespace: tlotr-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: frontend
+      app: tlotr
+  template:
+    metadata:
+      labels:
+        tier: frontend
+        app: tlotr
+        environment: local
+    spec:
+      containers:
+      - image: nicktorwald/tlotr-front:0.0.1
+        name: tlotr-front
+        env:
+        - name: TLOTR_BACK_HOST_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: tlotr-front-config
+              key: back_connect
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+          requests:
+            memory: "128Mi"
+            cpu: "250m"

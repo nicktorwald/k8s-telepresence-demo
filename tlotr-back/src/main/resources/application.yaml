@@ -1,0 +1,9 @@
+spring:
+  r2dbc:
+    url: "r2dbc:postgresql://${TLOTR_DB_HOST_PORT:localhost:5432}/tlotr"
+    username: "${TLOTR_DB_USERNAME:smeagol}"
+    password: "${TLOTR_DB_PASSWORD:my-precious}"
+  flyway:
+    url: "jdbc:postgresql://${TLOTR_DB_HOST_PORT:localhost:5432}/tlotr"
+    user: "${TLOTR_DB_USERNAME:smeagol}"
+    password: "${TLOTR_DB_PASSWORD:my-precious}"

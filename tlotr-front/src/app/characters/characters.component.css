@@ -1,0 +1,55 @@
+ul.characters {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #ccc;
+    border-radius: .5em;
+    width: 20em;
+}
+
+.characters li {
+    border-top: 1px solid #ccc;
+    padding: .5em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.characters li:first-child {
+    border-top: 0;
+}
+
+.characters .badge {
+    background-color: rebeccapurple;
+    color: #3B4252;
+    font-weight: bold;
+    font-size: 80%;
+    border-radius: 10em;
+    min-width: 1.5em;
+    padding: .25em;
+    text-align: center
+}
+
+.characters .badge.elves {
+    background-color: #A3BE8C;
+}
+
+.characters .badge.men {
+    background-color: #B48EAD;
+}
+
+.characters .badge.hobbits {
+    background-color: #EBCB8B;
+}
+
+.characters .badge.halfelven {
+    background-color: #88C0D0;
+}
+
+.characters .badge.maiar {
+    background-color: #5E81AC;
+}
+
+.characters .badge.dwarves {
+    background-color: #D08770;
+}

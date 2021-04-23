@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    tier: db
+    app: tlotr
+    environment: local
+  name: tlotr-db-creds
+  namespace: tlotr-app
+data:
+  db_password: bXktcHJlY2lvdXM=
+  db_user: c21lYWdvbA==

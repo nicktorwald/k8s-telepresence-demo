@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: tlotr
+    environment: local
+    tier: backend
+  name: tlotr-back-config
+  namespace: tlotr-app
+data:
+  db_connect: store-0.tlotr-db:5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: tlotr
+    environment: local
+    tier: backend
+  name: tlotr-back
+  namespace: tlotr-app
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: tlotr
+    tier: backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    tier: backend
+    app: tlotr
+    environment: local
+  name: tlotr-back
+  namespace: tlotr-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: backend
+      app: tlotr
+  template:
+    metadata:
+      labels:
+        tier: backend
+        app: tlotr
+        environment: local
+    spec:
+      containers:
+      - image: nicktorwald/tlotr-back:0.0.1
+        name: tlotr-back
+        env:
+        - name: TLOTR_DB_HOST_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: tlotr-back-config
+              key: db_connect
+        - name: TLOTR_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: tlotr-db-creds
+              key: db_user
+        - name: TLOTR_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: tlotr-db-creds
+              key: db_password
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+          requests:
+            memory: "512Mi"
+            cpu: "500m"

@@ -1,0 +1,6 @@
+<h2>Some characters:</h2>
+<ul class="characters">
+  <li *ngFor="let character of characters">
+    <a>{{character.name}}</a><span class="badge" [class]="character.race | lowercase">{{character.race}}</span>
+  </li>
+</ul>

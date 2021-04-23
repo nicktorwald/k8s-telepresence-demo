@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    tier: db
+    app: tlotr
+    environment: local
+  name: tlotr-db
+  namespace: tlotr-app
+spec:
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
+  clusterIP: None
+  selector:
+    tier: db
+    app: tlotr
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    tier: db
+    app: tlotr
+    environment: local
+  name: store
+  namespace: tlotr-app
+spec:
+  serviceName: tlotr-db
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: db
+      app: tlotr
+  template:
+    metadata:
+      labels:
+        tier: db
+        app: tlotr
+        environment: local
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:13.2
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: tlotr-db-creds
+              key: db_user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: tlotr-db-creds
+              key: db_password
+        - name: POSTGRES_DB
+          value: tlotr
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: tlotr-data
+          mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: tlotr-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi

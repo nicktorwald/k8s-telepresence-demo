@@ -1,0 +1,94 @@
+version: "3.9"
+services:
+  tlotr-db:
+    image: postgres:13.2
+    restart: always
+    labels:
+      tier: db
+      app: tlotr
+      environment: local
+    environment:
+      POSTGRES_DB: tlotr
+      POSTGRES_USER: smeagol
+      POSTGRES_PASSWORD: my-precious
+    volumes:
+      - type: volume
+        source: db-data
+        target: /data/db
+    networks:
+      - tlotr-network
+    ports:
+      - target: 5432
+        published: 5432
+        protocol: tcp
+        mode: host
+
+  tlotr-back:
+    image: nicktorwald/tlotr-back:0.0.1
+    restart: always
+    depends_on:
+      - tlotr-db
+    profiles:
+      - for-front-dev
+      - for-all
+    labels:
+      tier: backend
+      app: tlotr
+      environment: local
+    environment:
+      TLOTR_DB_HOST_PORT: tlotr-db:5432
+      TLOTR_DB_USERNAME: smeagol
+      TLOTR_DB_PASSWORD: my-precious
+    networks:
+      - tlotr-network
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+
+  tlotr-back-fake:
+    image: alpine/socat
+    labels:
+      tier: backend
+      app: tlotr
+      environment: local
+    entrypoint:
+      - sh
+      - -c
+      - |
+        DOCKER_HOST=$$(getent ahostsv4 host.docker.internal | head -n1 | cut -d' ' -f1)
+        echo socat will transfer data from :8080 to $${DOCKER_HOST}:8080
+        socat TCP-LISTEN:8080,fork TCP4:$${DOCKER_HOST}:8080
+    profiles:
+      - for-back-dev
+    networks:
+      tlotr-network:
+        aliases:
+          - tlotr-back
+
+  tlotr-front:
+    image: nicktorwald/tlotr-front:0.0.1
+    restart: always
+    profiles:
+      - for-back-dev
+      - for-all
+    labels:
+      tier: frontend
+      app: tlotr
+      environment: local
+    environment:
+      TLOTR_BACK_HOST_PORT: tlotr-back:8080
+    networks:
+      - tlotr-network
+    ports:
+      - target: 80
+        published: 4080
+        protocol: tcp
+        mode: host
+
+volumes:
+  db-data: { }  
+
+networks:
+  tlotr-network: { }

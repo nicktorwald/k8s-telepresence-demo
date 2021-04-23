@@ -1,0 +1,5 @@
+spring:
+  r2dbc:
+    url: "r2dbc:tc:postgresql:///tlotr?TC_IMAGE_TAG=13.2"
+  flyway:
+    enabled: false
